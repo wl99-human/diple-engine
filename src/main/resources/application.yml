@@ -1,0 +1,50 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: diple-engine
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem:diple_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        diple.transfer.latency: true
+        http.server.requests: true
+
+diple:
+  idempotency:
+    lock-ttl-seconds: 5
+    key-ttl-hours: 24
+  outbox:
+    relay-interval-ms: 100
+    batch-size: 50
+    max-retries: 4
+    base-delay-ms: 500
+    max-delay-ms: 10000
+  security:
+    hmac-secret: "diple-prod-faang-secret-key-2026-sha256"
+    rate-limit-per-second: 1000
