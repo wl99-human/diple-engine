@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIPLE — Distributed Idempotent Payment & Ledger Engine</title>
+  <link rel="stylesheet" href="/app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Top Bar Header -->
+    <header>
+      <div class="logo-group">
+        <div class="logo-badge">DIPLE</div>
+        <div class="title-desc">
+          <h1>Distributed Idempotent Payment & Ledger Engine</h1>
+          <p>FAANG Production Blueprint • Virtual Threads & Double-Entry Accounting</p>
+        </div>
+      </div>
+      <div class="system-status-badges">
+        <div class="status-pill">
+          <span class="status-dot pulse"></span>
+          <span id="audit-badge-text">Ledger 100% Conserved</span>
+        </div>
+        <div class="status-pill">
+          <span style="color: var(--accent-cyan); font-weight: 700;">Zero-Deadlock</span> Sorted Locks
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+
+      <!-- Section 1: Live Chart of Accounts Matrix -->
+      <div class="col-12 glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>💳</span> Chart of Accounts & Real-Time Balances
+          </div>
+          <button class="btn btn-primary" onclick="loadAccounts()" style="padding: 6px 12px; font-size: 0.75rem;">
+            🔄 Refresh
+          </button>
+        </div>
+        <div class="accounts-container" id="accounts-grid">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+      <!-- Section 2: Interactive Payment Transfer -->
+      <div class="col-6 glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>⚡</span> Execute Idempotent Transfer
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">X-Idempotency-Key Guarded</span>
+        </div>
+
+        <form id="transfer-form" onsubmit="handleTransferSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sender-select">From Account (Debit)</label>
+              <select id="sender-select" required></select>
+            </div>
+            <div class="form-group">
+              <label for="receiver-select">To Account (Credit)</label>
+              <select id="receiver-select" required></select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="amount-input">Amount ($)</label>
+              <input type="number" id="amount-input" step="0.01" min="0.01" value="25.00" required>
+            </div>
+            <div class="form-group">
+              <label for="currency-input">Currency</label>
+              <input type="text" id="currency-input" value="USD" readonly>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label for="idempotency-key-input" style="margin-bottom: 0;">X-Idempotency-Key (UUID)</label>
+              <button type="button" class="btn" style="padding: 2px 8px; font-size: 0.7rem; background: rgba(255,255,255,0.08);" onclick="generateNewKey()">
+                🎲 Regenerate
+              </button>
+            </div>
+            <input type="text" id="idempotency-key-input" required>
+          </div>
+
+          <div style="margin-bottom: 14px; display: flex; gap: 8px; align-items: center;">
+            <input type="checkbox" id="tamper-payload-check" style="width: auto;">
+            <label for="tamper-payload-check" style="font-size: 0.75rem; color: var(--accent-amber); cursor: pointer;">
+              Simulate Payload Tampering (Tests HTTP 422 Unprocessable Entity)
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="transfer-submit-btn">
+            Execute Atomic Transfer
+          </button>
+        </form>
+      </div>
+
+      <!-- Section 3: Concurrency Chaos Benchmark -->
+      <div class="col-6 glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🔥</span> High-Concurrency Chaos Benchmark
+          </div>
+          <span style="font-size: 0.75rem; color: var(--accent-rose);">Stress & Race Engine</span>
+        </div>
+
+        <p style="font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 14px;">
+          Fires concurrent bi-directional transfers across hot accounts, injecting duplicate idempotency keys to verify zero deadlocks and 100% balance integrity.
+        </p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="chaos-requests">Total Requests</label>
+            <input type="number" id="chaos-requests" value="100" min="10" max="500">
+          </div>
+          <div class="form-group">
+            <label for="chaos-concurrency">Virtual Workers</label>
+            <input type="number" id="chaos-concurrency" value="20" min="2" max="50">
+          </div>
+        </div>
+
+        <button class="btn btn-danger btn-block" onclick="runChaosBenchmark()" id="chaos-btn">
+          🚀 Launch Chaos Concurrency Attack
+        </button>
+
+        <div class="chaos-stats-grid" id="chaos-stats" style="display: none;">
+          <div class="stat-box">
+            <div class="stat-label">Throughput</div>
+            <div class="stat-value rps" id="stat-rps">0.0 RPS</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">p50 Latency</div>
+            <div class="stat-value" id="stat-p50">0ms</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">p95 Latency</div>
+            <div class="stat-value p95" id="stat-p95">0ms</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">p99 Latency</div>
+            <div class="stat-value p99" id="stat-p99">0ms</div>
+          </div>
+        </div>
+
+        <div id="chaos-summary" style="margin-top: 12px; font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);"></div>
+      </div>
+
+      <!-- Section 4: Live Double-Entry Ledger Stream & Cryptographic Hash Nodes -->
+      <div class="col-12 glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📜</span> Immutable Double-Entry Ledger Stream (SHA-256 Merkle Chain)
+          </div>
+          <button class="btn btn-warning" onclick="triggerAudit()" style="padding: 6px 12px; font-size: 0.75rem;">
+            🔍 Verify Cryptographic Audit Chain
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tx ID</th>
+                <th>Account</th>
+                <th>Direction</th>
+                <th>Amount</th>
+                <th>Running Balance</th>
+                <th>SHA-256 Merkle Hash</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-table-body">
+              <!-- Populated by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
