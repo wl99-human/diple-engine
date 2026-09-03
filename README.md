@@ -1,5 +1,4 @@
 # Distributed Idempotent Payment & Ledger Engine (DIPLE)
-### Production-Grade Architecture for FAANG SWE II (Google Consumer Payments / Wallet Track)
 
 ---
 
