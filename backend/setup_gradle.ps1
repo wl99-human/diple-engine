@@ -1,4 +1,4 @@
-﻿$toolsDir = "D:\Projects\diple-engine\tools"
+$toolsDir = Join-Path $PSScriptRoot "tools"
 if (!(Test-Path $toolsDir)) { New-Item -ItemType Directory -Path $toolsDir | Out-Null }
 $zipPath = "$toolsDir\gradle-8.10.2-bin.zip"
 $gradleDest = "$toolsDir\gradle-8.10.2"

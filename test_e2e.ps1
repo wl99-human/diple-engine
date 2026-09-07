@@ -1,5 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
+$backendDir = Join-Path $PSScriptRoot "backend"
+
 Write-Host "=== 1. Testing GET /v1/accounts ==="
 $accounts = Invoke-RestMethod -Uri "http://localhost:8080/v1/accounts" -Method Get
 Write-Host "Accounts count: $($accounts.Count)"
